@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_map/components/count.dart';
 import '../controllers/MetroController.dart';
 
 class MetroTicketSummary extends StatelessWidget {
@@ -11,47 +12,23 @@ class MetroTicketSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // عدد المحطات والدقايق
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // عدد المحطات
-            Column(
-              children: [
-                Icon(Icons.train, color: Colors.grey[800]),
-                const SizedBox(height: 4),
-                Obx(
-                  () => Text(
-                    '${controller.stations.value}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const Text('محطات', style: TextStyle(color: Colors.grey)),
-              ],
-            ),
-
-            // عدد الدقايق
-            Column(
-              children: [
-                Icon(Icons.access_time, color: Colors.grey[800]),
-                const SizedBox(height: 4),
-                Obx(
-                  () => Text(
-                    '${controller.minutes.value}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const Text('دقيقه', style: TextStyle(color: Colors.grey)),
-              ],
-            ),
-          ],
+        // عدد المحطات والدقايق باستخدام CountWidget
+        Obx(
+          () => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              TicketDataWidget(
+                icon: Icons.train,
+                text: '${controller.stations.value} محطات',
+              ),
+              TicketDataWidget(
+                icon: Icons.access_time,
+                text: '${controller.minutes.value} دقيقه',
+              ),
+            ],
+          ),
         ),
+
         const SizedBox(height: 16),
 
         // المبلغ

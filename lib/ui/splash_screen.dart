@@ -16,8 +16,8 @@ class SplashScreen extends StatelessWidget {
           children: [
             SizedBox(
               child: VideoPlayer(controller.videoController),
-              width: 220,
-              height: 220,
+              width: 250,
+              height: 250,
             ),
 
             Text(
@@ -25,7 +25,7 @@ class SplashScreen extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'Elephant',
                 color: Color(0xFFCE5A5A),
-                fontSize: 40,
+                fontSize: 55,
                 fontWeight: FontWeight.bold,
               ),
             ),
