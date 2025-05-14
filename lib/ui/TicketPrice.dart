@@ -10,6 +10,8 @@ class TicketPrice extends StatelessWidget {
   final metroController = Get.put(MetroController());
   final count = 0.obs;
   final showSummary = false.obs;
+  final needSwitch = false.obs;
+  late int stations;
 
   void resetAll() {
     controller.startStation.value = '';
@@ -17,11 +19,14 @@ class TicketPrice extends StatelessWidget {
     count.value = 0;
     metroController.updateValues(newStations: 0, newMinutes: 0, newPrice: 0);
     showSummary.value = false;
+    needSwitch.value = false;
   }
 
   @override
   Widget build(BuildContext context) {
-    // تصفير عند أول دخول
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       resetAll();
     });
@@ -31,12 +36,12 @@ class TicketPrice extends StatelessWidget {
         children: [
           Card(
             elevation: 4,
-            margin: const EdgeInsets.all(20),
+            margin: EdgeInsets.all(screenWidth * 0.05),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(30),
+              padding: EdgeInsets.all(screenWidth * 0.06),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -47,15 +52,23 @@ class TicketPrice extends StatelessWidget {
                     onChanged: (value) {
                       controller.startStation.value = value;
                       count.value = 0;
+                      showSummary.value = false;
                       metroController.updateValues(
                         newStations: 0,
                         newMinutes: 0,
                         newPrice: 0,
                       );
-                      showSummary.value = false;
+
+                      if (controller.endStation.value.isNotEmpty) {
+                        needSwitch.value =
+                            controller.getLineOfStation(value) !=
+                            controller.getLineOfStation(
+                              controller.endStation.value,
+                            );
+                      }
                     },
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: screenHeight * 0.02),
                   CustomDropdownmenu(
                     label: 'End Station',
                     selectedValue: controller.endStation,
@@ -63,22 +76,26 @@ class TicketPrice extends StatelessWidget {
                     onChanged: (value) {
                       controller.endStation.value = value;
                       count.value = 0;
+                      showSummary.value = false;
                       metroController.updateValues(
                         newStations: 0,
                         newMinutes: 0,
                         newPrice: 0,
                       );
-                      showSummary.value = false;
+
+                      if (controller.startStation.value.isNotEmpty) {
+                        needSwitch.value =
+                            controller.getLineOfStation(value) !=
+                            controller.getLineOfStation(
+                              controller.startStation.value,
+                            );
+                      }
                     },
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: screenHeight * 0.02),
                   Container(
-                    height:
-                        MediaQuery.of(context).size.height *
-                        0.06, // ارتفاع 6% من الشاشة
-                    width:
-                        MediaQuery.of(context).size.width *
-                        0.9, // العرض 90% من الشاشة
+                    height: 50,
+                    width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
@@ -86,20 +103,19 @@ class TicketPrice extends StatelessWidget {
                         width: 2,
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.03,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Flexible(
-                          flex: 3,
+                          flex: 5,
                           child: Text(
                             'Number Of Individuals',
                             style: TextStyle(
                               color: const Color(0xFF670D2F),
-                              fontSize:
-                                  MediaQuery.of(context).size.width *
-                                  0.035, // يعتمد على العرض
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -116,8 +132,7 @@ class TicketPrice extends StatelessWidget {
                             '${count.value}',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.045,
+                              fontSize: screenWidth * 0.045,
                             ),
                           ),
                         ),
@@ -133,14 +148,16 @@ class TicketPrice extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  SizedBox(height: 25),
+                  SizedBox(height: screenHeight * 0.03),
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        backgroundColor: Color(0xFF670D2F),
+                        backgroundColor: const Color(0xFF670D2F),
                         foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                          vertical: screenHeight * 0.02,
+                        ),
                       ),
                       onPressed: () {
                         final start = controller.startStation.value;
@@ -152,14 +169,15 @@ class TicketPrice extends StatelessWidget {
                           return;
                         }
 
-                        int stations = metroController.calculateStationsBetween(
+                        final sameLine =
+                            controller.getLineOfStation(start) ==
+                            controller.getLineOfStation(end);
+                        needSwitch.value = !sameLine;
+
+                        stations = metroController.calculateStationsBetween(
                           start,
                           end,
                         );
-                        if (stations == -1) {
-                          Get.snackbar("خطأ", "المحطات ليست على نفس الخط");
-                          return;
-                        }
 
                         int minutes = metroController.calculateTime(stations);
                         double totalPrice = metroController.calculateTotalPrice(
@@ -175,55 +193,86 @@ class TicketPrice extends StatelessWidget {
 
                         showSummary.value = true;
                       },
-                      child: Text('Count'),
+                      child: const Text('Count'),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-
-          /// 👇 النتائج
           if (showSummary.value) ...[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Row(
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+              child: Column(
                 children: [
-                  Expanded(
-                    child: InfoCard(
-                      icon: Icons.access_time,
-                      text: '${metroController.minutes.value} دقيقة',
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InfoCard(
+                          icon: Icons.access_time,
+                          text: '${metroController.minutes.value} دقيقة',
+                        ),
+                      ),
+                      SizedBox(width: screenWidth * 0.02),
+                      Expanded(
+                        child: InfoCard(
+                          icon: Icons.train,
+                          text: '${metroController.stations.value} محطات',
+                        ),
+                      ),
+                      SizedBox(width: screenWidth * 0.02),
+                      // Expanded(
+                      //   child: InfoCard(
+                      //     icon: Icons.money,
+                      //     text: 'المبلغ: ${metroController.price.value} جنيه',
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                  Container(
+                    height: 50,
+                    width: double.infinity,
+                    margin: EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Color(0xff670D2F), width: 2),
+                    ),
+                    child: Text(
+                      'المبلغ: ${metroController.price.value} جنيه',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: screenWidth * 0.045,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: InfoCard(
-                      icon: Icons.train,
-                      text: '${metroController.stations.value} محطات',
+                  SizedBox(height: 5),
+                  if (needSwitch.value)
+                    Container(
+                      height: 100,
+                      width: double.infinity,
+                      margin: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.04,
+                      ),
+                      padding: EdgeInsets.all(screenWidth * 0.04),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Color(0xff670D2F), width: 2),
+                      ),
+                      child: Text(
+                        '⚠️ المحطتين مش على نفس الخط.\nيجب التبديل عند محطة: ${controller.getTransferStation(controller.startStation.value, controller.endStation.value)}',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: screenWidth * 0.045,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ),
                 ],
-              ),
-            ),
-            SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.symmetric(horizontal: 20),
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Color(0xFF670D2F), width: 2),
-              ),
-              child: Center(
-                child: Text(
-                  'المبلغ: ${metroController.price.value} جنيه',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
               ),
             ),
           ],
@@ -242,16 +291,24 @@ class InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.grey[800]),
-          SizedBox(width: 8),
-          Text(text, style: TextStyle(fontWeight: FontWeight.w600)),
+          Icon(icon, color: Colors.grey[800], size: 20),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+            ),
+          ),
         ],
       ),
     );

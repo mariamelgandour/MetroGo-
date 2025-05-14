@@ -39,8 +39,8 @@ class CustomDropdownmenu extends StatelessWidget {
             borderSide: const BorderSide(color: Color(0xFF670D2F), width: 2.5),
           ),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 18,
+            horizontal: 12,
+            vertical: 10,
           ),
           filled: true,
           fillColor: Colors.white,
