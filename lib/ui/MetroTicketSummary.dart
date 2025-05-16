@@ -54,18 +54,14 @@ class MetroTicketSummary extends StatelessWidget {
                 Expanded(
                   child: InfoCard(
                     icon: Icons.access_time,
-                    text: 'stations_count'.trParams({
-                      'count': metroController.stations.value.toString(),
-                    }),
+                    text: '${metroController.stations.value} ${'stations'.tr}',
                   ),
                 ),
                 SizedBox(width: 10),
                 Expanded(
                   child: InfoCard(
                     icon: Icons.train,
-                    text: 'minutes_count'.trParams({
-                      'count': metroController.minutes.value.toString(),
-                    }),
+                    text: '${metroController.minutes.value} ${'minutes'.tr}',
                   ),
                 ),
               ],

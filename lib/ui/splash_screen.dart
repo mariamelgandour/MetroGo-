@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_map/ui/Home_Page.dart';
 import 'dart:async';
 
 import 'BottomNav.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashController extends GetxController {
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
+  void onInit() {
+    super.onInit();
 
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-
-    // بعد 3 ثواني يروح على الشاشة الرئيسية
     Timer(Duration(seconds: 4), () {
-      Get.off(() => BottomNavBar()); // ← غيرها لاسم شاشتك الأساسية
+      Get.off(() => BottomNavBar());
     });
   }
+}
+
+class SplashScreen extends GetView<SplashController> {
+  @override
+  final SplashController controller = Get.put(SplashController());
 
   @override
   Widget build(BuildContext context) {
