@@ -16,8 +16,8 @@ class SplashController extends GetxController {
 }
 
 class SplashScreen extends GetView<SplashController> {
-  @override
-  final SplashController controller = Get.put(SplashController());
+  // @override
+  // final SplashController controller = Get.put(SplashController());
 
   @override
   Widget build(BuildContext context) {

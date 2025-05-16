@@ -19,18 +19,14 @@ class LanguageThemeSelector extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // اللغة (جهة اليمين)
         Expanded(
           child: DropdownButtonFormField<String>(
             value: selectedLanguage,
             decoration: const InputDecoration(
               labelText: 'اللغة',
-              border: OutlineInputBorder(), // الحدود الافتراضية
+              border: OutlineInputBorder(),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Color(0xFFA53860), // لون الحافة وقت التفاعل
-                  width: 2,
-                ),
+                borderSide: BorderSide(color: Color(0xFFA53860), width: 2),
               ),
               contentPadding: EdgeInsets.symmetric(horizontal: 10),
             ),
@@ -41,19 +37,16 @@ class LanguageThemeSelector extends StatelessWidget {
             onChanged: onLanguageChanged,
           ),
         ),
-        const SizedBox(width: 16), // المسافة بين القائمتين
-        // الثيم (جهة الشمال)
+        const SizedBox(width: 16),
+
         Expanded(
           child: DropdownButtonFormField<String>(
             value: selectedTheme,
             decoration: const InputDecoration(
               labelText: 'الثيم',
-              border: OutlineInputBorder(), // الحدود الافتراضية
+              border: OutlineInputBorder(),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Color(0xFFA53860), // لون الحافة وقت التفاعل
-                  width: 2,
-                ),
+                borderSide: BorderSide(color: Color(0xFFA53860), width: 2),
               ),
               contentPadding: EdgeInsets.symmetric(horizontal: 10),
             ),

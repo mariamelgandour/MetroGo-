@@ -43,7 +43,6 @@ class MetroController extends GetxController {
     return graph;
   }
 
-  // BFS للبحث عن أقصر مسار بين أي محطتين
   List<String> findPathBetweenStations(String start, String end) {
     final graph = _buildGraph();
     final queue = <List<String>>[];
@@ -73,7 +72,6 @@ class MetroController extends GetxController {
     final path = findPathBetweenStations(start, end);
     if (path.isEmpty) return -1;
 
-    // استخراج المحطات التبادلية (إن وجدت)
     transferStations.clear();
     List<List<Map<String, dynamic>>> allLines = [
       MetroLines.line1,

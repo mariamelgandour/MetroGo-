@@ -5,7 +5,7 @@ import 'controllers/themeController.dart';
 import 'controllers/languageController.dart';
 import 'ui/splash_screen.dart';
 import 'colorTheme.dart';
-import 'translations.dart'; // ملف الترجمة الخاص بك
+import 'translations.dart';
 
 void main() {
   Get.put(ThemeController());
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
     return Obx(
       () => GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        translations: AppTranslations(), // كلاس الترجمة الخاص بك
+        translations: AppTranslations(),
         locale: langController.currentLocale,
         fallbackLocale: Locale('en'),
         theme: themeController.currentTheme,
