@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_map/components/details.dart';
 
 import '../components/custom_DropDownMenu.dart';
+import '../components/custom_ticket_details.dart';
 import '../controllers/MetroController.dart';
 import '../controllers/StationsController.dart';
 
@@ -13,29 +15,21 @@ class TicketPrice extends StatelessWidget {
   final needSwitch = false.obs;
   late int stations;
 
-  void resetAll() {
+  @override
+  Widget build(BuildContext context) {
     controller.startStation.value = '';
     controller.endStation.value = '';
     count.value = 0;
-    metroController.updateValues(newStations: 0, newMinutes: 0, newPrice: 0);
-    showSummary.value = false;
-    needSwitch.value = false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      resetAll();
-    });
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Obx(
       () => Column(
         children: [
           Card(
             elevation: 4,
+            color: isDark ? Color(0xff393E46) : Colors.grey[200],
             margin: EdgeInsets.all(screenWidth * 0.05),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -46,19 +40,14 @@ class TicketPrice extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   CustomDropdownmenu(
-                    label: 'Start Station',
+                    label: 'start_station'.tr,
+                    text: 'select_station'.tr,
+                    hintMassage: false,
                     selectedValue: controller.startStation,
                     options: controller.stationNames,
                     onChanged: (value) {
                       controller.startStation.value = value;
-                      count.value = 0;
                       showSummary.value = false;
-                      metroController.updateValues(
-                        newStations: 0,
-                        newMinutes: 0,
-                        newPrice: 0,
-                      );
-
                       if (controller.endStation.value.isNotEmpty) {
                         needSwitch.value =
                             controller.getLineOfStation(value) !=
@@ -70,19 +59,14 @@ class TicketPrice extends StatelessWidget {
                   ),
                   SizedBox(height: screenHeight * 0.02),
                   CustomDropdownmenu(
-                    label: 'End Station',
+                    label: 'end_station'.tr,
+                    text: 'select_station'.tr,
+                    hintMassage: false,
                     selectedValue: controller.endStation,
                     options: controller.stationNames,
                     onChanged: (value) {
                       controller.endStation.value = value;
-                      count.value = 0;
                       showSummary.value = false;
-                      metroController.updateValues(
-                        newStations: 0,
-                        newMinutes: 0,
-                        newPrice: 0,
-                      );
-
                       if (controller.startStation.value.isNotEmpty) {
                         needSwitch.value =
                             controller.getLineOfStation(value) !=
@@ -99,9 +83,10 @@ class TicketPrice extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: const Color(0xFF670D2F),
+                        color: isDark ? Colors.white : Color(0xFF670D2F),
                         width: 2,
                       ),
+                      color: isDark ? Color(0xff393E46) : Colors.grey[200],
                     ),
                     padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.03,
@@ -112,9 +97,9 @@ class TicketPrice extends StatelessWidget {
                         Flexible(
                           flex: 5,
                           child: Text(
-                            'Number Of Individuals',
+                            'number_of_individuals'.tr,
                             style: TextStyle(
-                              color: const Color(0xFF670D2F),
+                              color: isDark ? Colors.white : Color(0xFF670D2F),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -123,7 +108,10 @@ class TicketPrice extends StatelessWidget {
                           flex: 1,
                           child: IconButton(
                             onPressed: () => count.value++,
-                            icon: const Icon(Icons.add),
+                            icon: Icon(
+                              Icons.add,
+                              color: isDark ? Colors.white : Color(0xff24242c),
+                            ),
                           ),
                         ),
                         Flexible(
@@ -133,6 +121,7 @@ class TicketPrice extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: screenWidth * 0.045,
+                              color: isDark ? Colors.white : Color(0xff24242c),
                             ),
                           ),
                         ),
@@ -142,7 +131,10 @@ class TicketPrice extends StatelessWidget {
                             onPressed: () {
                               if (count.value > 0) count.value--;
                             },
-                            icon: const Icon(Icons.remove),
+                            icon: Icon(
+                              Icons.remove,
+                              color: isDark ? Colors.white : Color(0xff24242c),
+                            ),
                           ),
                         ),
                       ],
@@ -165,7 +157,13 @@ class TicketPrice extends StatelessWidget {
                         final individuals = count.value;
 
                         if (start == '' || end == '') {
-                          Get.snackbar("خطأ", "اختر محطتين صحيحتين");
+                          Get.snackbar(
+                            'error'.tr,
+                            'choose_two_stations'.tr,
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.redAccent,
+                            colorText: Colors.white,
+                          );
                           return;
                         }
 
@@ -193,7 +191,7 @@ class TicketPrice extends StatelessWidget {
 
                         showSummary.value = true;
                       },
-                      child: const Text('Count'),
+                      child: Text('count'.tr),
                     ),
                   ),
                 ],
@@ -210,105 +208,31 @@ class TicketPrice extends StatelessWidget {
                       Expanded(
                         child: InfoCard(
                           icon: Icons.access_time,
-                          text: '${metroController.minutes.value} دقيقة',
+                          text:
+                              '${metroController.minutes.value} ${'minutes'.tr}',
                         ),
                       ),
                       SizedBox(width: screenWidth * 0.02),
                       Expanded(
                         child: InfoCard(
                           icon: Icons.train,
-                          text: '${metroController.stations.value} محطات',
+                          text:
+                              '${metroController.stations.value} ${'stations'.tr}',
                         ),
                       ),
-                      SizedBox(width: screenWidth * 0.02),
-                      // Expanded(
-                      //   child: InfoCard(
-                      //     icon: Icons.money,
-                      //     text: 'المبلغ: ${metroController.price.value} جنيه',
-                      //   ),
-                      // ),
                     ],
                   ),
-                  Container(
-                    height: 50,
+                  SizedBox(height: 10),
+                  DetailsContainer(
+                    text:
+                        '${'total_amount'.tr}: ${metroController.price.value} ${'currency'.tr}',
+                    height: 40,
                     width: double.infinity,
-                    margin: EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Color(0xff670D2F), width: 2),
-                    ),
-                    child: Text(
-                      'المبلغ: ${metroController.price.value} جنيه',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: screenWidth * 0.045,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
                   ),
-                  SizedBox(height: 5),
-                  if (needSwitch.value)
-                    Container(
-                      height: 100,
-                      width: double.infinity,
-                      margin: EdgeInsets.symmetric(
-                        horizontal: screenWidth * 0.04,
-                      ),
-                      padding: EdgeInsets.all(screenWidth * 0.04),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Color(0xff670D2F), width: 2),
-                      ),
-                      child: Text(
-                        '⚠️ المحطتين مش على نفس الخط.\nيجب التبديل عند محطة: ${controller.getTransferStation(controller.startStation.value, controller.endStation.value)}',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: screenWidth * 0.045,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
                 ],
               ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class InfoCard extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const InfoCard({required this.icon, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.grey[800], size: 20),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              text,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
-              softWrap: false,
-            ),
-          ),
         ],
       ),
     );

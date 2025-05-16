@@ -16,6 +16,7 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       bottomNavigationBar: Obx(() {
         return CurvedNavigationBar(
@@ -23,17 +24,17 @@ class BottomNavBar extends StatelessWidget {
           items: [
             CurvedNavigationBarItem(
               child: Icon(Icons.home_outlined, color: Colors.white),
-              label: 'Home',
+              label: 'home'.tr,
               labelStyle: TextStyle(color: Colors.white),
             ),
             CurvedNavigationBarItem(
               child: Icon(Icons.star_outline, color: Colors.white),
-              label: 'Feature',
+              label: 'feature'.tr,
               labelStyle: TextStyle(color: Colors.white),
             ),
             CurvedNavigationBarItem(
               child: Icon(Icons.settings_outlined, color: Colors.white),
-              label: 'Settings',
+              label: 'settings'.tr,
               labelStyle: TextStyle(color: Colors.white),
             ),
           ],
@@ -41,7 +42,7 @@ class BottomNavBar extends StatelessWidget {
             controller.selectedIndex.value = index;
           },
           color: Color(0xFF670D2F),
-          backgroundColor: Colors.white,
+          backgroundColor: isDark ? Color(0xff24242c) : Colors.white,
         );
       }),
       body: Obx(() {

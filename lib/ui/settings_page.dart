@@ -1,62 +1,47 @@
 import 'package:flutter/material.dart';
-
-import '../components/custom_settings_page.dart';
-import '../components/customdropdownsettings.dart';
+import 'package:get/get.dart';
+import '../controllers/themeController.dart';
+import '../controllers/languageController.dart';
 
 class SettingsPage extends StatelessWidget {
-  final String selectedLanguage = 'ar';
-  final String selectedTheme = 'light';
+  final ThemeController themeController = Get.find();
+  final LanguageController languageController = Get.find();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(30),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(30), // حواف معقولة
-                    child: Container(
-                      width: 130, // العرض
-                      height: 130, // الطول
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Image.asset(
-                        'assets/images/logo.jpg',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
+      appBar: AppBar(title: Text('settings'.tr)),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Obx(
+              () => SwitchListTile(
+                title: Text('dark_mode'.tr),
+                value: themeController.isDarkMode.value,
+                onChanged: (val) {
+                  themeController.toggleTheme(val);
+                },
               ),
-
-              SizedBox(height: 40),
-              LanguageThemeSelector(
-                selectedLanguage: selectedLanguage,
-                selectedTheme: selectedTheme,
-                onLanguageChanged: (val) {},
-                onThemeChanged: (val) {},
-              ),
-
-              SizedBox(height: 24),
-
-              StyledBoxList(
-                items: const [
-                  "📱Rate Us on Google Play",
-                  "ℹ️ about app",
-                  "👨‍💻 about developers",
+            ),
+            SizedBox(height: 20),
+            Obx(
+              () => DropdownButton<String>(
+                value: languageController.selectedLanguage.value,
+                items: [
+                  DropdownMenuItem(value: 'en', child: Text('English')),
+                  DropdownMenuItem(value: 'ar', child: Text('العربية')),
                 ],
+                onChanged: (val) {
+                  if (val != null) {
+                    languageController.selectedLanguage.value = val;
+                    final locale = Locale(val, val.toUpperCase());
+                    Get.updateLocale(locale);
+                  }
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

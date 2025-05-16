@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
-
 import '../data/metro_lines.dart';
 
 class MetroController extends GetxController {
   var stations = 0.obs;
   var minutes = 0.obs;
   var price = 0.obs;
+  final transferStations = <String>[].obs;
 
   void updateValues({
     required int newStations,
@@ -17,7 +17,10 @@ class MetroController extends GetxController {
     price.value = newPrice.toInt();
   }
 
-  int calculateStationsBetween(String start, String end) {
+  // كل المحطات وعلاقتها ببعض (ببساطة خريطة)
+  Map<String, List<String>> _buildGraph() {
+    final graph = <String, List<String>>{};
+
     List<List<Map<String, dynamic>>> allLines = [
       MetroLines.line1,
       MetroLines.line2,
@@ -25,14 +28,72 @@ class MetroController extends GetxController {
     ];
 
     for (var line in allLines) {
-      final names = line.map((e) => e["name"] as String).toList();
-      if (names.contains(start) && names.contains(end)) {
-        int startIndex = names.indexOf(start);
-        int endIndex = names.indexOf(end);
-        return (startIndex - endIndex).abs();
+      for (int i = 0; i < line.length - 1; i++) {
+        String current = line[i]['name'];
+        String next = line[i + 1]['name'];
+
+        graph.putIfAbsent(current, () => []);
+        graph.putIfAbsent(next, () => []);
+
+        graph[current]!.add(next);
+        graph[next]!.add(current);
       }
     }
-    return -1; // not found on same line
+
+    return graph;
+  }
+
+  // BFS للبحث عن أقصر مسار بين أي محطتين
+  List<String> findPathBetweenStations(String start, String end) {
+    final graph = _buildGraph();
+    final queue = <List<String>>[];
+    final visited = <String>{};
+
+    queue.add([start]);
+    visited.add(start);
+
+    while (queue.isNotEmpty) {
+      final path = queue.removeAt(0);
+      final last = path.last;
+
+      if (last == end) return path;
+
+      for (var neighbor in graph[last]!) {
+        if (!visited.contains(neighbor)) {
+          visited.add(neighbor);
+          queue.add([...path, neighbor]);
+        }
+      }
+    }
+
+    return [];
+  }
+
+  int calculateStationsBetween(String start, String end) {
+    final path = findPathBetweenStations(start, end);
+    if (path.isEmpty) return -1;
+
+    // استخراج المحطات التبادلية (إن وجدت)
+    transferStations.clear();
+    List<List<Map<String, dynamic>>> allLines = [
+      MetroLines.line1,
+      MetroLines.line2,
+      MetroLines.line3,
+    ];
+
+    for (int i = 1; i < path.length - 1; i++) {
+      int foundIn = 0;
+      for (var line in allLines) {
+        if (line.any((station) => station['name'] == path[i])) {
+          foundIn++;
+        }
+      }
+      if (foundIn > 1) {
+        transferStations.addIf(!transferStations.contains(path[i]), path[i]);
+      }
+    }
+
+    return path.length - 1;
   }
 
   int calculateTime(int stationCount) {

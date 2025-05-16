@@ -1,30 +1,35 @@
-// import 'package:get/get.dart';
-// import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-//
-// class Linescontroller extends GetxController {
-//   var lines = ''.obs;
-//   final linesNames = ['First Line', 'Second Line', 'Third Line'];
-// }
 import 'package:get/get.dart';
 import '../data/metro_lines.dart';
+import '../translations.dart';
 
-class Linescontroller extends GetxController {
-  final RxString selectedLine = 'Line 1'.obs;
-  final List<String> linesNames = ['Line 1', 'Line 2', 'Line 3'];
+class LinesController extends GetxController {
+  final RxString selectedLine = 'First Line'.obs;
 
-  // إضافة getter للوصول إلى القيمة كـ RxString
+  // القيم الأصلية بدون ترجمة
+  final List<String> rawLineKeys = ['first_line', 'second_line', 'third_line'];
+
+  // Getter يعيدها مترجمة في أي وقت حسب اللغة الحالية
+  List<String> get linesNames => rawLineKeys.map((key) => key.tr).toList();
+
+  // 2️⃣ خريطة تربط الاسم المترجم بالقيمة الأصلية
+  Map<String, String> get linesTranslationMap => {
+    'first_line'.tr: 'First Line',
+    'second_line'.tr: 'Second Line',
+    'third_line'.tr: 'Third Line',
+  };
+
   RxString get lines => selectedLine;
 
   List<Map<String, dynamic>> getStationsForSelectedLine() {
     switch (selectedLine.value) {
-      case 'Line 1':
+      case 'First Line':
         return MetroLines.line1;
-      case 'Line 2':
+      case 'Second Line':
         return MetroLines.line2;
-      case 'Line 3':
+      case 'Third Line':
         return MetroLines.line3;
       default:
-        return MetroLines.line1;
+        return [];
     }
   }
 }

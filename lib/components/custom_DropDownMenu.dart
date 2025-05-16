@@ -6,6 +6,9 @@ class CustomDropdownmenu extends StatelessWidget {
   final RxString selectedValue;
   final List<String> options;
   final Function(String)? onChanged;
+  final bool hintMassage;
+  final String? hintText;
+  final String text;
 
   const CustomDropdownmenu({
     super.key,
@@ -13,83 +16,152 @@ class CustomDropdownmenu extends StatelessWidget {
     required this.selectedValue,
     required this.options,
     this.onChanged,
+    required this.hintMassage,
+    this.hintText,
+    required this.text,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(
-            color: Color(0xFF670D2F),
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Obx(() {
+      return GestureDetector(
+        onTap: () {
+          showSearchableDialog(context);
+        },
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: TextStyle(
+              color: isDark ? Colors.white : Color(0xFF670D2F),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: isDark ? Colors.white : Color(0xFF670D2F),
+                width: 2,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+
+              borderSide: BorderSide(
+                color: isDark ? Colors.white : Color(0xFF670D2F),
+                width: 2,
+              ),
+            ),
+
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 14,
+            ),
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF670D2F), width: 2),
+          child: Text(
+            selectedValue.value.isEmpty ? '${text}' : selectedValue.value,
+            style: TextStyle(
+              color: isDark ? Colors.white : Color(0xFF670D2F),
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+            ),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF670D2F), width: 2),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF670D2F), width: 2.5),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 10,
-          ),
-          filled: true,
-          fillColor: Colors.white,
         ),
-        value: selectedValue.value.isEmpty ? null : selectedValue.value,
-        items:
-            options.map((station) {
-              return DropdownMenuItem<String>(
-                value: station,
-                child: Text(
-                  station,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
+      );
+    });
+  }
+
+  void showSearchableDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    TextEditingController searchController = TextEditingController();
+    RxList<String> filteredOptions = RxList<String>(options);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: isDark ? Color(0xff393E46) : Colors.white,
+          title: Text(
+            '${text}',
+            style: TextStyle(
+              color: isDark ? Colors.white : Color(0xFF670D2F),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                cursorColor: isDark ? Colors.white : Color(0xffA53860),
+
+                autocorrect: true,
+                enabled: true,
+                mouseCursor: MouseCursor.defer,
+                enableSuggestions: true,
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  prefixIcon: Icon(Icons.search),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: isDark ? Colors.white : Color(0xFF670D2F),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: isDark ? Colors.white : Color(0xFF670D2F),
+                    ),
                   ),
                 ),
-              );
-            }).toList(),
-        onChanged: (String? value) {
-          if (value != null && value != selectedValue.value) {
-            selectedValue.value = value;
-            onChanged?.call(value);
-          }
-        },
-        borderRadius: BorderRadius.circular(12),
-        elevation: 4,
-        icon: const Icon(
-          Icons.arrow_drop_down,
-          color: Color(0xFF670D2F),
-          size: 32,
-        ),
-        isExpanded: true,
-        dropdownColor: Colors.white,
-        menuMaxHeight: 300,
-        style: const TextStyle(color: Colors.black, fontSize: 16),
-        selectedItemBuilder: (BuildContext context) {
-          return options.map((String value) {
-            return Text(
-              value,
-              style: const TextStyle(
-                color: Color(0xFF670D2F),
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+                onChanged: (value) {
+                  filteredOptions.value =
+                      options
+                          .where(
+                            (option) => option.toLowerCase().contains(
+                              value.toLowerCase(),
+                            ),
+                          )
+                          .toList();
+                },
               ),
-            );
-          }).toList();
-        },
-      ),
+              const SizedBox(height: 12),
+              Obx(() {
+                return SizedBox(
+                  height: 200,
+                  width: double.maxFinite,
+                  child: ListView.builder(
+                    itemCount: filteredOptions.length,
+                    itemBuilder: (context, index) {
+                      final item = filteredOptions[index];
+                      return Column(
+                        children: [
+                          ListTile(
+                            title: Text(
+                              item,
+                              style: TextStyle(
+                                color:
+                                    isDark ? Colors.white : Color(0xFF670D2F),
+                              ),
+                            ),
+                            onTap: () {
+                              selectedValue.value = item;
+                              onChanged?.call(item);
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          Divider(
+                            color: isDark ? Colors.white : Color(0xFF670D2F),
+                            height: 3,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                );
+              }),
+            ],
+          ),
+        );
+      },
     );
   }
 }
