@@ -1,34 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_map/ui/Home_Page.dart';
 import '../controllers/MetroController.dart';
 import '../controllers/StationsController.dart';
 import '../components/details.dart';
 import '../components/custom_ticket_details.dart';
-import '../data/metro_lines.dart';
 
 class MetroTicketSummary extends StatelessWidget {
   final String start;
   final String end;
-  final controller = Get.find<StationController>();
 
+  final controller = Get.find<StationController>();
   final metroController = Get.put(MetroController());
-  final Color transferColor = Colors.black;
 
   MetroTicketSummary({Key? key, required this.start, required this.end})
     : super(key: key);
 
-  final StationController stationController = Get.find<StationController>();
-
   @override
   Widget build(BuildContext context) {
-    final String transferInfo = stationController.getTransferStation(
-      start,
-      end,
-    );
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final allPaths = metroController.findAllPathsBetweenStations(start, end);
+
     return Scaffold(
-      backgroundColor: isDark ? Color(0xff24242c) : Colors.white,
+      backgroundColor: isDark ? const Color(0xff24242c) : Colors.white,
       appBar: AppBar(
         backgroundColor: isDark ? Color(0xff24242c) : Colors.white,
         leading: IconButton(
@@ -37,13 +30,15 @@ class MetroTicketSummary extends StatelessWidget {
             controller.endStation.value = '';
             Get.back();
           },
-          icon: Icon(Icons.arrow_back),
-          color: isDark ? Colors.white : Color(0xFF670D2F),
+          icon: const Icon(Icons.arrow_back),
+          color: isDark ? Colors.white : const Color(0xFF670D2F),
         ),
-        // title: Text(
-        //   'تفاصيل الرحلة',
-        //   style: TextStyle(color: Color(0xFF670D2F)),
-        // ),
+        title: Text(
+          'summary_title'.tr,
+          style: TextStyle(color: isDark ? Colors.white : Colors.black),
+        ),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -54,36 +49,65 @@ class MetroTicketSummary extends StatelessWidget {
                 Expanded(
                   child: InfoCard(
                     icon: Icons.access_time,
-                    text: '${metroController.stations.value} ${'stations'.tr}',
+                    text: '${metroController.minutes.value} ${'minutes'.tr}',
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: InfoCard(
                     icon: Icons.train,
-                    text: '${metroController.minutes.value} ${'minutes'.tr}',
+                    text: '${metroController.stations.value} ${'stations'.tr}',
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             DetailsContainer(
               text: 'route_from_to'.trParams({'start': start, 'end': end}),
               width: double.infinity,
               height: 80,
             ),
             const SizedBox(height: 16),
-            DetailsContainer(
-              text: 'no_transfer'.tr,
-              width: double.infinity,
-              height: 80,
-            ),
-            const SizedBox(height: 16),
-            SingleChildScrollView(
-              child: SizedBox(
-                height: 300,
-                width: double.infinity,
-                child: _buildTimelineRoute(isDark),
+            Expanded(
+              child: ListView.builder(
+                itemCount: allPaths.length,
+                itemBuilder: (context, index) {
+                  final path = allPaths[index];
+                  final transferDescription = _buildTransfersDescription(path);
+
+                  return Card(
+                    elevation: 3,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    color: isDark ? Colors.grey[900] : Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${'path'.tr} ${index + 1}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: isDark ? Colors.white : Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            transferDescription,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.orange,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          for (int i = 0; i < path.length; i++)
+                            _buildStationRow(path, i, isDark),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -92,80 +116,45 @@ class MetroTicketSummary extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineRoute(var isDark) {
-    final List<Map<String, dynamic>> fullStations = [
-      ...MetroLines.line1,
-      ...MetroLines.line2,
-      ...MetroLines.line3,
-    ];
+  Widget _buildStationRow(List<String> path, int index, bool isDark) {
+    final station = path[index];
+    final currentLine = controller.getLineOfStation(station);
+    final previousLine =
+        index > 0 ? controller.getLineOfStation(path[index - 1]) : currentLine;
+    final bool isTransfer = index > 0 && currentLine != previousLine;
 
-    final List<String> route = controller.getRoute(start, end);
-    final transferStations = controller.getTransferStations(start, end);
-
-    final bool isSameLine =
-        controller.getLineOfStation(start) == controller.getLineOfStation(end);
-    final Color sameLineColor = _getLineColor(
-      controller.getLineOfStation(start),
-    );
-
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: [
-            for (int i = 0; i < route.length; i++)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                textDirection: TextDirection.rtl,
-                children: [
-                  Column(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color:
-                              isSameLine
-                                  ? sameLineColor
-                                  : transferStations.contains(route[i])
-                                  ? transferColor
-                                  : _getLineColor(
-                                    controller.getLineOfStation(route[i]),
-                                  ),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      if (i != route.length - 1)
-                        Container(
-                          width: 2,
-                          height: 40,
-                          color:
-                              isSameLine
-                                  ? sameLineColor
-                                  : _getLineColor(
-                                    controller.getLineOfStation(route[i]),
-                                  ),
-                        ),
-                    ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.circle, size: 10, color: _getLineColor(currentLine)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  station,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 2.0),
-                      child: Text(
-                        route[i],
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                      ),
-                    ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  isTransfer
+                      ? 'transfer_to'.trParams({'line': currentLine})
+                      : 'same_line'.trParams({'line': currentLine}),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isTransfer ? Colors.orange : Colors.grey,
                   ),
-                ],
-              ),
-          ],
-        ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -180,6 +169,24 @@ class MetroTicketSummary extends StatelessWidget {
         return Colors.green;
       default:
         return Colors.grey;
+    }
+  }
+
+  String _buildTransfersDescription(List<String> path) {
+    final transfers = <String>{};
+
+    for (int i = 1; i < path.length; i++) {
+      final prevLine = controller.getLineOfStation(path[i - 1]);
+      final currLine = controller.getLineOfStation(path[i]);
+      if (prevLine != currLine) {
+        transfers.add(path[i]);
+      }
+    }
+
+    if (transfers.isEmpty) {
+      return 'no_transfer'.tr;
+    } else {
+      return 'transfer_station'.trParams({'station': transfers.join(', ')});
     }
   }
 }

@@ -36,11 +36,13 @@ dependencies:
   cupertino_icons: ^1.0.8
   get: ^4.7.2
   dartx: ^1.2.0
-  geolocator: ^14.0.0
+  geolocator: ^10.1.0
   video_player: ^2.9.5
   curved_labeled_navigation_bar: ^2.0.6
   timelines_plus: ^1.0.6
   flutter_native_splash: ^2.4.6
+  flutter_map: ^8.1.1
+  latlong2: ^0.9.1
 
 
 dev_dependencies:
@@ -90,11 +92,12 @@ flutter:
         - asset: assets/fonts/Elephant-PersonalUse.ttf
 
 flutter_native_splash:
-  color: "#fff3f3"
-  background_image: "assets/images/a.png"
+  background_image: assets/images/a.png
   fullscreen: true
   android: true
   ios: true
+
+
 flutter_icons:
   android: true
   ios: true

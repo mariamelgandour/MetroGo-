@@ -9,6 +9,7 @@ import '../controllers/themeController.dart';
 import 'MetroTicketSummary.dart';
 
 import '../data/metro_lines.dart';
+import 'NearstMetroStstion.dart';
 
 class HomePage extends StatelessWidget {
   final StationController stationController = Get.put(StationController());
@@ -20,6 +21,9 @@ class HomePage extends StatelessWidget {
   final needSwitch = false.obs;
   final enabled = false.obs;
   final nearestStationName = ''.obs;
+  final isArabic = Get.locale?.languageCode == 'ar';
+  final userLat = 0.0.obs;
+  final userLng = 0.0.obs;
 
   HomePage({super.key});
 
@@ -40,6 +44,10 @@ class HomePage extends StatelessWidget {
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
+            textDirection:
+                Get.locale?.languageCode == 'ar'
+                    ? TextDirection.rtl
+                    : TextDirection.ltr,
           ),
           backgroundColor:
               themeController.isDarkMode.value
@@ -57,6 +65,7 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.all(10.0),
             child: SingleChildScrollView(
               child: Column(
+                spacing: 5,
                 children: [
                   Container(
                     height: 85,
@@ -80,17 +89,29 @@ class HomePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'nearest_metro_station'.tr,
-                      style: TextStyle(
-                        color:
-                            themeController.isDarkMode.value
-                                ? Colors.white70
-                                : AppThemes.lightMainColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    alignment:
+                        Get.locale?.languageCode == 'ar'
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                    child: Builder(
+                      builder: (context) {
+                        final isArabic = Get.locale?.languageCode == 'ar';
+                        return Text(
+                          'nearest_metro_station'.tr,
+                          textAlign:
+                              isArabic ? TextAlign.right : TextAlign.left,
+                          textDirection:
+                              isArabic ? TextDirection.rtl : TextDirection.ltr,
+                          style: TextStyle(
+                            color:
+                                themeController.isDarkMode.value
+                                    ? Colors.white70
+                                    : AppThemes.lightMainColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   Obx(
@@ -126,7 +147,7 @@ class HomePage extends StatelessWidget {
                             Icons.gps_fixed,
                             color: isDark ? Colors.white : Color(0xFF670D2F),
                           ),
-                          onPressed: () => getLocation(),
+                          onPressed: () => getLocationAndOpenMap(),
                         ),
                       ],
                     ),
@@ -249,7 +270,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Future<void> getLocation() async {
+  Future<void> getLocationAndOpenMap() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -274,8 +295,19 @@ class HomePage extends StatelessWidget {
     }
 
     final position = await Geolocator.getCurrentPosition();
-    final nearest = getNearestStation(position.latitude, position.longitude);
+    userLat.value = position.latitude;
+    userLng.value = position.longitude;
+
+    final nearest = getNearestStation(userLat.value, userLng.value);
     nearestStationName.value = nearest;
+
+    Get.to(
+      () => NearestStationMap(
+        userLat: userLat.value,
+        userLng: userLng.value,
+        nearestStationName: nearest,
+      ),
+    );
   }
 
   String getNearestStation(double userLat, double userLng) {
