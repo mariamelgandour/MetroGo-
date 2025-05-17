@@ -1,12 +1,12 @@
-## 🏠 الصفحة الرئيسية
+
 
 ![Home Light](assets/screenshots/homescreen_light.jpg)
 ![Home Dark](assets/screenshots/homescreen_dark.jpg)
 
-![Feature_light](assets/screenshots/feature_light.png)
-![Feature_dark](assets/screenshots/feature_dark.png)
+![Feature Light](assets/screenshots/feature_light.png)
+![Feature Dark](assets/screenshots/feature_dark.png)
 assets/screenshots/settings.png
 
-![Settings_light](assets/screenshots/settings.png)
-![Settings_dark](assets/screenshots/settings_dark.png)
-![MaAP](assets/screenshots/map.png)
+![Settings Light](assets/screenshots/settings.png)
+![Settings Dark](assets/screenshots/settings_dark.png)
+![MAP](assets/screenshots/map.png)
