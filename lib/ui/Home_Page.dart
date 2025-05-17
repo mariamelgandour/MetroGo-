@@ -7,8 +7,8 @@ import '../controllers/MetroController.dart';
 import '../controllers/StationsController.dart';
 import '../controllers/themeController.dart';
 import 'MetroTicketSummary.dart';
-
 import '../data/metro_lines.dart';
+
 import 'NearstMetroStstion.dart';
 
 class HomePage extends StatelessWidget {
@@ -31,6 +31,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     count.value = 0;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Obx(
       () => Scaffold(
         appBar: AppBar(
@@ -65,7 +66,6 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.all(10.0),
             child: SingleChildScrollView(
               child: Column(
-                spacing: 5,
                 children: [
                   Container(
                     height: 85,
@@ -90,28 +90,20 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 20),
                   Align(
                     alignment:
-                        Get.locale?.languageCode == 'ar'
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                    child: Builder(
-                      builder: (context) {
-                        final isArabic = Get.locale?.languageCode == 'ar';
-                        return Text(
-                          'nearest_metro_station'.tr,
-                          textAlign:
-                              isArabic ? TextAlign.right : TextAlign.left,
-                          textDirection:
-                              isArabic ? TextDirection.rtl : TextDirection.ltr,
-                          style: TextStyle(
-                            color:
-                                themeController.isDarkMode.value
-                                    ? Colors.white70
-                                    : AppThemes.lightMainColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        );
-                      },
+                        isArabic ? Alignment.centerRight : Alignment.centerLeft,
+                    child: Text(
+                      'nearest_metro_station'.tr,
+                      textAlign: isArabic ? TextAlign.right : TextAlign.left,
+                      textDirection:
+                          isArabic ? TextDirection.rtl : TextDirection.ltr,
+                      style: TextStyle(
+                        color:
+                            themeController.isDarkMode.value
+                                ? Colors.white70
+                                : AppThemes.lightMainColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                   Obx(
@@ -122,10 +114,14 @@ class HomePage extends StatelessWidget {
                           height: 40,
                           width: 270,
                           decoration: BoxDecoration(
-                            color: isDark ? Color(0xff24242c) : Colors.white,
+                            color:
+                                isDark ? const Color(0xff24242c) : Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: isDark ? Colors.white : Color(0xFF670D2F),
+                              color:
+                                  isDark
+                                      ? Colors.white
+                                      : const Color(0xFF670D2F),
                               width: 2,
                             ),
                           ),
@@ -135,7 +131,10 @@ class HomePage extends StatelessWidget {
                                 ? 'please_open_gps'.tr
                                 : nearestStationName.value,
                             style: TextStyle(
-                              color: isDark ? Colors.white : Color(0xFF670D2F),
+                              color:
+                                  isDark
+                                      ? Colors.white
+                                      : const Color(0xFF670D2F),
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
@@ -145,7 +144,8 @@ class HomePage extends StatelessWidget {
                         IconButton(
                           icon: Icon(
                             Icons.gps_fixed,
-                            color: isDark ? Colors.white : Color(0xFF670D2F),
+                            color:
+                                isDark ? Colors.white : const Color(0xFF670D2F),
                           ),
                           onPressed: () => getLocationAndOpenMap(),
                         ),

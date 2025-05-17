@@ -62,8 +62,10 @@ class MetroTicketSummary extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
+
             DetailsContainer(
-              text: 'route_from_to'.trParams({'start': start, 'end': end}),
+              text: '$start ${'to'.tr} $end',
+
               width: double.infinity,
               height: 80,
             ),
@@ -78,7 +80,7 @@ class MetroTicketSummary extends StatelessWidget {
                   return Card(
                     elevation: 3,
                     margin: const EdgeInsets.symmetric(vertical: 8),
-                    color: isDark ? Colors.grey[900] : Colors.white,
+                    color: isDark ? Color(0xff24242c) : Colors.white,
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Column(

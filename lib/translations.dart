@@ -17,12 +17,16 @@ class AppTranslations extends Translations {
       'end_station': 'End Station',
       'select_station': 'Select Station',
       'get_details': 'Get Details',
+      'use_default_location': 'Default location used (Cairo)',
+
+      'route_from_to': 'Route from {start} to {end}',
+      'to': 'to',
       'error': 'Error',
       'We Wish You an easy Trip': 'We Wish you an easy trip',
       "summary_title": "Route Summary",
       "stations": "stations",
       "minutes": "minutes",
-      "route_from_to": "Route from :start to :end",
+
       "path": "Path",
       "transfer_to": "Transfer to :line",
       "same_line": "On the same line (:line)",
@@ -346,7 +350,7 @@ class AppTranslations extends Translations {
       'summary_title': 'ملخص الرحلة',
       'stations': 'محطات',
       'minutes': 'دقائق',
-      'route_from_to': 'المسار من @start إلى @end',
+
       'path': 'مسار',
       'no_transfer': 'لا يوجد تبديل خطوط',
       'transfer_to': 'التبديل إلى خط @line',
@@ -356,7 +360,25 @@ class AppTranslations extends Translations {
       'total_time': 'الوقت الكلي',
       'total_stations': 'إجمالي المحطات',
       'ticket_price': 'سعر التذكرة',
+      "route_from_to": "مسار من @start إلى @end",
       'We Wish You an easy Trip': 'نتمنى لك رحلة سهلة',
+      "route_from_to": "مسار من {start} إلى {end}",
+      "to": "إلى",
+      'use_default_location':
+          'تم استخدام القاهره كموقع افتراضي عند بدايه الاستخدام',
     },
   };
+}
+
+extension CustomTranslation on String {
+  String trParams(Map<String, String> params) {
+    String translated = this.tr; // الحصول على الترجمة الأساسية
+    params.forEach((key, value) {
+      translated = translated.replaceAll(
+        '@$key',
+        value,
+      ); // استبدال @key بالقيمة
+    });
+    return translated;
+  }
 }
