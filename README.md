@@ -1,12 +1,13 @@
 
 ![Splash](assets/screenshots/splash.jpg)
+
 ![Home Light](assets/screenshots/homescreen_light.jpg)
 
-![Home Dark](assets/screenshots/homescreen_dark.jpg)
+![Home Dark](assets/screenshots/homescreen_dark.png)
 
 ![Feature Light](assets/screenshots/feature_light.png)
 
-![Feature Dark](assets/screenshots/feature_dark.png
+![Feature Dark](assets/screenshots/feature_dark.jpg)
 
 ![Ticket Light](assets/screenshots/ticket.png)
 
